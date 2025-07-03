@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="it" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Content Coherence Analyzer</title>
+  </head>
+  <body class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-300">
+    <!-- Header -->
+    <header class="text-center mb-8">
+      <div class="flex justify-between items-start mb-4">
+        <div></div>
+        <div class="text-center">
+          <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">Content Coherence Analyzer</h1>
+          <p class="text-lg text-gray-600 dark:text-gray-300">Analizza la coerenza dei tuoi contenuti utilizzando embeddings vettoriali</p>
+        </div>
+        <div class="flex flex-col items-end gap-2">
+          <!-- Dark Mode Toggle -->
+          <button id="darkModeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200" title="Toggle Dark Mode">
+            <svg id="darkModeIcon" class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6 max-w-6xl">
+      <!-- Configuration Section -->
+      <section class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">Configurazione</h2>
+        
+        <div class="space-y-6">
+          <!-- API Key Input -->
+          <div>
+            <label for="apiKey" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              API Key Google Gemini
+            </label>
+            <div class="relative">
+              <input
+                type="password"
+                id="apiKey"
+                placeholder="Inserisci la tua API key di Google Gemini..."
+                class="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+              />
+              <button
+                type="button"
+                id="toggleApiKey"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center"
+              >
+                <svg id="eyeIcon" class="w-5 h-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              Necessaria per generare gli embeddings vettoriali. La chiave viene salvata localmente nel browser.
+            </p>
+          </div>
+
+          <!-- Keyword Input -->
+          <div>
+            <label for="targetKeyword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Parola Chiave Target
+            </label>
+            <input
+              type="text"
+              id="targetKeyword"
+              placeholder="es. marketing digitale, SEO, content strategy..."
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+            />
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              La parola chiave principale attorno alla quale vuoi misurare la coerenza del contenuto.
+            </p>
+          </div>
+
+          <!-- Content Input -->
+          <div>
+            <label for="contentText" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Contenuto da Analizzare
+            </label>
+            <textarea
+              id="contentText"
+              rows="12"
+              placeholder="Incolla qui il tuo articolo, post del blog, o qualsiasi contenuto testuale che vuoi analizzare..."
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+            ></textarea>
+            <div class="flex justify-between items-center mt-2">
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                <span id="charCount">0 caratteri</span> • <span id="wordCount">0 parole</span>
+              </div>
+              <div class="flex items-center">
+                <input type="checkbox" id="enableStopwords" checked class="mr-2">
+                <label for="enableStopwords" class="text-sm text-gray-700 dark:text-gray-300">Rimuovi stopwords</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analyze Button -->
+          <div class="flex flex-col items-center space-y-3">
+            <button
+              id="analyzeBtn"
+              disabled
+              class="w-full max-w-md px-8 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors duration-200 flex items-center justify-center"
+            >
+              <span class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Analizza Contenuto
+              </span>
+            </button>
+            <div id="analyzeBtnHelp" class="text-sm text-gray-500 dark:text-gray-400 text-center">
+              Inserisci API key, parola chiave target e almeno 100 caratteri di contenuto per iniziare l'analisi.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Progress Section -->
+      <section id="progressSection" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 hidden">
+        <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">Progresso Analisi</h2>
+        
+        <!-- Progress Bar -->
+        <div class="mb-6">
+          <div class="flex justify-between items-center mb-2">
+            <span id="progressText" class="text-sm font-medium text-gray-700 dark:text-gray-300">Inizializzazione...</span>
+            <span id="progressPercentage" class="text-sm font-medium text-gray-700 dark:text-gray-300">0%</span>
+          </div>
+          <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div id="progressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div id="stepStructure" class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div class="w-4 h-4 rounded-full border-2 border-gray-300 mr-3"></div>
+            <div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Analisi Struttura</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">Parsing del testo</div>
+            </div>
+          </div>
+          <div id="stepEmbeddings" class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div class="w-4 h-4 rounded-full border-2 border-gray-300 mr-3"></div>
+            <div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Generazione Embeddings</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">Vettorializzazione</div>
+            </div>
+          </div>
+          <div id="stepCalculation" class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div class="w-4 h-4 rounded-full border-2 border-gray-300 mr-3"></div>
+            <div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Calcolo Coerenza</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">Analisi finale</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Error Section -->
+      <section id="errorSection" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-8 hidden">
+        <div class="flex items-start">
+          <svg class="w-6 h-6 text-red-600 dark:text-red-400 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <h3 class="text-lg font-semibold text-red-800 dark:text-red-300 mb-2">Errore</h3>
+            <p id="errorMessage" class="text-red-700 dark:text-red-200"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results Section -->
+      <section id="resultsSection" class="hidden">
+        <!-- Summary Metrics -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+          <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">Metriche di Coerenza</h2>
+          <div id="summaryMetrics" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+        </div>
+
+        <!-- Paragraph Analysis -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">Analisi per Paragrafo</h2>
+            <div class="flex gap-2">
+              <button id="exportJson" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors duration-200">
+                Esporta JSON
+              </button>
+              <button id="exportCsv" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors duration-200">
+                Esporta CSV
+              </button>
+            </div>
+          </div>
+          <div id="paragraphAnalysis" class="space-y-6"></div>
+        </div>
+
+        <!-- Suggestions Section (Hidden by default as suggestions are integrated into paragraphs) -->
+        <div id="suggestions-section" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hidden">
+          <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">Suggerimenti per Migliorare</h2>
+          
+          <!-- Suggestion Tabs -->
+          <div class="flex space-x-1 mb-6 border-b border-gray-200 dark:border-gray-700">
+            <button class="suggestions-tab-btn px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-600" data-priority="all">
+              Tutti (<span class="total-count"></span>)
+            </button>
+            <button class="suggestions-tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-priority="high">
+              Alta Priorità (<span class="high-count">0</span>)
+            </button>
+            <button class="suggestions-tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700" data-priority="medium">
+              Media Priorità (<span class="medium-count">0</span>)
+            </button>
+          </div>
+
+          <div id="suggestions-summary"></div>
+          <div id="suggestions-content" class="space-y-4"></div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
