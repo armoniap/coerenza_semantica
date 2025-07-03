@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/content-coherence-analyzer-main/',
+  base: '/coerenza_semantica/',
   server: {
     port: 3002,
     open: true,
