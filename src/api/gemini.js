@@ -1,4 +1,4 @@
-const GEMINI_API_BASE = '/api/v1beta';
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 const EMBEDDING_MODEL = 'embedding-001';
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY = 1000;
