@@ -1,5 +1,5 @@
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
-const EMBEDDING_MODEL = 'embedding-001';
+const EMBEDDING_MODEL = 'gemini-embedding-001'; // ✅ AGGIORNATO
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY = 1000;
 
@@ -15,7 +15,7 @@ export async function generateEmbeddings(apiKey, texts, taskType = 'SEMANTIC_SIM
   // Process texts one by one instead of batch
   for (const text of texts) {
     const requestBody = {
-      model: `models/${EMBEDDING_MODEL}`,
+      model: `models/${EMBEDDING_MODEL}`, // ✅ AGGIORNATO
       content: {
         parts: [{ text }]
       },
@@ -39,7 +39,7 @@ export async function generateEmbeddings(apiKey, texts, taskType = 'SEMANTIC_SIM
 async function makeRequestWithRetry(url, options, retryCount = 0) {
   try {
     const response = await fetch(url, options);
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       
@@ -59,20 +59,20 @@ async function makeRequestWithRetry(url, options, retryCount = 0) {
       
       throw new Error(`API Error ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
     }
-    
+
     const data = await response.json();
-    
+
     if (!data.embedding || !data.embedding.values) {
       throw new Error('Invalid response format from Gemini API');
     }
-    
+
     return data.embedding.values;
-    
+
   } catch (error) {
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
       throw new Error('Errore di connessione. Verifica la tua connessione internet.');
     }
-    
+
     if (retryCount < MAX_RETRIES && (
       error.message.includes('network') || 
       error.message.includes('timeout') ||
@@ -83,7 +83,7 @@ async function makeRequestWithRetry(url, options, retryCount = 0) {
       await sleep(delay);
       return makeRequestWithRetry(url, options, retryCount + 1);
     }
-    
+
     throw error;
   }
 }
